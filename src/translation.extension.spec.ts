@@ -5,6 +5,7 @@ import { TranslationExtension } from './translation.extension';
  */
 describe('TranslationExtension', () => {
   let extension: TranslationExtension = null;
+  let extensionMissingDefaultLocale: TranslationExtension = null;
 
   /**
    * SetUp test environment.
@@ -20,6 +21,17 @@ describe('TranslationExtension', () => {
         },
       },
       defaultLocale: 'en_EN',
+    });
+    extensionMissingDefaultLocale = new TranslationExtension({
+      translations: {
+        de_DE: {
+          MSG_HELLO: 'Hallo',
+        },
+        en_EN: {
+          MSG_HELLO: 'Hello',
+        },
+      },
+      defaultLocale: 'fr_FR',
     });
   });
 
@@ -110,6 +122,18 @@ describe('TranslationExtension', () => {
    */
   it('returns translation key on missing translation entry', () => {
     expect(extension.trans({}, 'de_DE', () => 'MSG_UNKNOWN')).toEqual({
+      length: 11,
+      val: 'MSG_UNKNOWN',
+    });
+  });
+
+  /**
+   * Test returning translation key if locale and default locale not found.
+   */
+  it('returns translation key if locale and default locale not found', () => {
+    expect(
+      extensionMissingDefaultLocale.trans({}, 'es_ES', () => 'MSG_UNKNOWN'),
+    ).toEqual({
       length: 11,
       val: 'MSG_UNKNOWN',
     });

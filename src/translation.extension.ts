@@ -79,8 +79,14 @@ export class TranslationExtension implements Extension {
   public translateText(textId: string, locale: string): string {
     locale = locale || this.options.defaultLocale;
 
+    // Fallback to default locale
     if (!this.options.translations[locale]) {
       locale = this.options.defaultLocale;
+    }
+
+    // Default locale not found?
+    if (!this.options.translations[locale]) {
+      return textId;
     }
 
     return this.options.translations[locale][textId] || textId;
