@@ -23,18 +23,18 @@ import { TranslationExtension } from 'nunjucks-translation';
 const translationExtension = new TranslationExtension({
   translations: {
     de_DE: {
-      MSG_HELLO: 'Hallo',
+      MSG_HELLO: 'Hallo ${name}',
     },
     en_EN: {
-      MSG_HELLO: 'Hello',
+      MSG_HELLO: 'Hello ${name}',
     },
   },
   defaultLocale: 'en_EN',
 });
 
 nunjucksEnv.addExtension('translation-extension', translationExtension);
-nunjucksEnv.addFilter('trans', (textId: string, locale: string) =>
-  translationExtension.translateText(textId, locale),
+nunjucksEnv.addFilter('trans', (textId: string, locale: string, params: object) =>
+  translationExtension.translateText(textId, locale, params),
 );
 ```
 Example using translations from JSON file:
@@ -50,8 +50,8 @@ const translationExtension = new TranslationExtension(
 );
 
 nunjucksEnv.addExtension('translation-extension', translationExtension);
-nunjucksEnv.addFilter('trans', (textId: string, locale: string) =>
-  translationExtension.translateText(textId, locale),
+nunjucksEnv.addFilter('trans', (textId: string, locale: string, params: object) =>
+  translationExtension.translateText(textId, locale, params),
 );
 ```
 
@@ -64,7 +64,7 @@ You can use the `trans` and `endtrans` tags to translate your content.
   <head>
   </head>
   <body>
-    {% trans('de_DE') %}MSG_HELLO{% endtrans %}
+    {% trans('de_DE', { name: 'John Doe' }) %}MSG_HELLO{% endtrans %}
   </body>
 </html>
 ```
@@ -78,7 +78,7 @@ You can also use the `trans` filter to translate your content.
   <head>
   </head>
   <body>
-    {{ 'MSG_HELLO'|trans('de_DE') }}
+    {{ 'MSG_HELLO'|trans('de_DE', { name: 'John Doe' }) }}
   </body>
 </html>
 ```
