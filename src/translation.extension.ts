@@ -57,13 +57,21 @@ export class TranslationExtension implements Extension {
    * @param {Function} body - Function providing body.
    * @return {string}
    */
-  public trans(
-    context: Context,
-    locale: string,
-    body: () => string,
-  ): SafeString {
-    const translationId: string = body();
-    const translatedText: string = this.translateText(translationId, locale);
+  public trans(...args: any): // context: Context,
+  // locale: string,
+  // body: () => string,
+  SafeString {
+    const context = args.shift();
+    const locale = args.shift();
+    const body = args.pop();
+    const params = args.shift() || {};
+
+    const translationId: string = typeof body === 'function' ? body() : '';
+    const translatedText: string = this.translateText(
+      translationId,
+      locale,
+      params,
+    );
 
     return new SafeString(translatedText);
   }
@@ -73,10 +81,11 @@ export class TranslationExtension implements Extension {
    *
    * @param {string} textId - Text ID to translate.
    * @param {string} locale - Translation locale.
+   * @param {object} params - Params for translation
    * @return {string}
    * @private
    */
-  public translateText(textId: string, locale: string): string {
+  public translateText(textId: string, locale: string, params: object): string {
     locale = locale || this.options.defaultLocale;
 
     // Fallback to default locale
@@ -89,7 +98,45 @@ export class TranslationExtension implements Extension {
       return textId;
     }
 
-    return this.options.translations[locale][textId] || textId;
+    let translated: string =
+      this.options.translations[locale][textId] || textId;
+
+    // Parameter substitution
+    for (const paramName in params) {
+      const paramValue: string =
+        typeof params[paramName] === 'string' ? params[paramName] : '';
+      translated = this.replaceAll(
+        translated,
+        '${' + paramName + '}',
+        paramValue,
+      );
+    }
+
+    return translated;
+  }
+
+  /**
+   * String escaping for RegEx.
+   *
+   * @param {string} str - The string to escape
+   * @return {string}
+   * @private
+   */
+  private escapeRegExp(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  }
+
+  /**
+   * Replace all occurrences of a string.
+   *
+   * @param {string} str - The subject
+   * @param {string} find - String to replace
+   * @param {string} replace - The replacement
+   * @return {string}
+   * @private
+   */
+  private replaceAll(str: string, find: string, replace: string) {
+    return str.replace(new RegExp(this.escapeRegExp(find), 'g'), replace);
   }
 }
 

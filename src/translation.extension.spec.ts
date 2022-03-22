@@ -7,17 +7,16 @@ describe('TranslationExtension', () => {
   let extension: TranslationExtension = null;
   let extensionMissingDefaultLocale: TranslationExtension = null;
 
-  /**
-   * SetUp test environment.
-   */
   beforeEach(() => {
     extension = new TranslationExtension({
       translations: {
         de_DE: {
           MSG_HELLO: 'Hallo',
+          MSG_WITH_PARAMS: 'Hallo ${name}',
         },
         en_EN: {
           MSG_HELLO: 'Hello',
+          MSG_WITH_PARAMS: 'Hello ${name}',
         },
       },
       defaultLocale: 'en_EN',
@@ -35,16 +34,10 @@ describe('TranslationExtension', () => {
     });
   });
 
-  /**
-   * Test that extension supports all suggested types.
-   */
   it('supports suggested tags', () => {
     expect(extension.tags).toContain('trans');
   });
 
-  /**
-   * Test that the parser works correctly.
-   */
   it('parses correctly', () => {
     const nextTokenMock = jest.fn(() => {
       return { value: 'token_value' };
@@ -77,9 +70,6 @@ describe('TranslationExtension', () => {
     expect(advanceAfterBlockEndMock).toHaveBeenCalledWith('token_value');
   });
 
-  /**
-   * Test translation for DE locale.
-   */
   it('translates correctly for de_DE locale', () => {
     expect(extension.trans({}, 'de_DE', () => 'MSG_HELLO')).toEqual({
       length: 5,
@@ -87,9 +77,6 @@ describe('TranslationExtension', () => {
     });
   });
 
-  /**
-   * Test translation for EN locale.
-   */
   it('translates correctly for en_EN locale', () => {
     expect(extension.trans({}, 'en_EN', () => 'MSG_HELLO')).toEqual({
       length: 5,
@@ -97,9 +84,6 @@ describe('TranslationExtension', () => {
     });
   });
 
-  /**
-   * Test translation fallback to default EN locale on missing locale param.
-   */
   it('translates correctly with fallback to default en_EN locale', () => {
     expect(extension.trans({}, undefined, () => 'MSG_HELLO')).toEqual({
       length: 5,
@@ -107,9 +91,6 @@ describe('TranslationExtension', () => {
     });
   });
 
-  /**
-   * Test translation with fallback to default EN locale.
-   */
   it('translates correctly with fallback to default en_EN locale', () => {
     expect(extension.trans({}, 'fr_FR', () => 'MSG_HELLO')).toEqual({
       length: 5,
@@ -117,9 +98,24 @@ describe('TranslationExtension', () => {
     });
   });
 
-  /**
-   * Test returning translation key if no translation found.
-   */
+  it('translates correctly with parameters for de_DE locale', () => {
+    expect(
+      extension.trans({}, 'de_DE', { name: 'Welt' }, () => 'MSG_WITH_PARAMS'),
+    ).toEqual({
+      length: 10,
+      val: 'Hallo Welt',
+    });
+  });
+
+  it('translates correctly with parameters for en_EN locale', () => {
+    expect(
+      extension.trans({}, 'en_EN', { name: 'World' }, () => 'MSG_WITH_PARAMS'),
+    ).toEqual({
+      length: 11,
+      val: 'Hello World',
+    });
+  });
+
   it('returns translation key on missing translation entry', () => {
     expect(extension.trans({}, 'de_DE', () => 'MSG_UNKNOWN')).toEqual({
       length: 11,
@@ -127,9 +123,6 @@ describe('TranslationExtension', () => {
     });
   });
 
-  /**
-   * Test returning translation key if locale and default locale not found.
-   */
   it('returns translation key if locale and default locale not found', () => {
     expect(
       extensionMissingDefaultLocale.trans({}, 'es_ES', () => 'MSG_UNKNOWN'),
