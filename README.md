@@ -22,6 +22,16 @@ import { TranslationExtension } from 'nunjucks-translation';
 
 const translationExtension = new TranslationExtension({
   translations: {
+    de: {
+      message: {
+        hello: 'Hallo {name}',
+      },
+    },
+    en: {
+      message: {
+        hello: 'Hello {name}',
+      }
+    },
     de_DE: {
       MSG_HELLO: 'Hallo ${name}',
     },
@@ -29,7 +39,8 @@ const translationExtension = new TranslationExtension({
       MSG_HELLO: 'Hello ${name}',
     },
   },
-  defaultLocale: 'en_EN',
+  locale: 'de_DE',
+  fallbackLocale: 'en_EN',
 });
 
 nunjucksEnv.addExtension('translation-extension', translationExtension);
@@ -64,6 +75,7 @@ You can use the `trans` and `endtrans` tags to translate your content.
   <head>
   </head>
   <body>
+    {% trans('de', { name: 'John Doe' }) %}hello{% endtrans %}
     {% trans('de_DE', { name: 'John Doe' }) %}MSG_HELLO{% endtrans %}
   </body>
 </html>
@@ -78,6 +90,7 @@ You can also use the `trans` filter to translate your content.
   <head>
   </head>
   <body>
+    {{ 'hello'|trans('de', { name: 'John Doe' }) }}
     {{ 'MSG_HELLO'|trans('de_DE', { name: 'John Doe' }) }}
   </body>
 </html>
