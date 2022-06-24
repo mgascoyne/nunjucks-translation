@@ -14,7 +14,8 @@ export class TranslationExtension implements Extension {
   constructor(
     private readonly options: TranslationExtensionOptions = {
       translations: {},
-      defaultLocale: 'EN',
+      locale: 'en',
+      fallbackLocale: 'en',
     },
   ) {}
 
@@ -86,20 +87,10 @@ export class TranslationExtension implements Extension {
    * @private
    */
   public translateText(textId: string, locale: string, params: object): string {
-    locale = locale || this.options.defaultLocale;
-
-    // Fallback to default locale
-    if (!this.options.translations[locale]) {
-      locale = this.options.defaultLocale;
-    }
-
-    // Default locale not found?
-    if (!this.options.translations[locale]) {
-      return textId;
-    }
+    locale = this.selectLocale(locale, textId);
 
     let translated: string =
-      this.options.translations[locale][textId] || textId;
+      this.options.translations[locale]?.['message']?.[textId] || textId;
 
     // Parameter substitution
     for (const paramName in params) {
@@ -107,7 +98,7 @@ export class TranslationExtension implements Extension {
         typeof params[paramName] === 'string' ? params[paramName] : '';
       translated = this.replaceAll(
         translated,
-        '${' + paramName + '}',
+        '{' + paramName + '}',
         paramValue,
       );
     }
@@ -138,6 +129,46 @@ export class TranslationExtension implements Extension {
   private replaceAll(str: string, find: string, replace: string) {
     return str.replace(new RegExp(this.escapeRegExp(find), 'g'), replace);
   }
+
+  /**
+   * Check if translation exists for given locale and text id.
+   *
+   * @param {string} locale - Locale
+   * @param {string} textId  - Text ID
+   * @return {boolean}
+   * @private
+   */
+  private translationExistsForLocale(locale: string, textId: string): boolean {
+    return (
+      this.options.translations[locale]?.['message']?.[textId] !== undefined
+    );
+  }
+
+  /**
+   * Select locale for translation.
+   *
+   * @param {string} locale - Given locale
+   * @param {string} textId - Text ID
+   * @return {string}
+   * @private
+   */
+  private selectLocale(locale: string, textId: string): string {
+    // use given locale
+    if (locale && this.translationExistsForLocale(locale, textId)) {
+      return locale;
+    }
+
+    // use default locale if locale is not given
+    if (
+      !locale &&
+      this.translationExistsForLocale(this.options.locale, textId)
+    ) {
+      return this.options.locale;
+    }
+
+    // use fallback locale
+    return this.options.fallbackLocale;
+  }
 }
 
 /**
@@ -145,5 +176,6 @@ export class TranslationExtension implements Extension {
  */
 export interface TranslationExtensionOptions {
   translations: object;
-  defaultLocale: string;
+  locale: string;
+  fallbackLocale: string;
 }
