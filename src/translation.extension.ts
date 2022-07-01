@@ -58,10 +58,7 @@ export class TranslationExtension implements Extension {
    * @param {Function} body - Function providing body.
    * @return {string}
    */
-  public trans(...args: any): // context: Context,
-  // locale: string,
-  // body: () => string,
-  SafeString {
+  public trans(...args: any): SafeString {
     const context = args.shift();
     const locale = args.shift();
     const body = args.pop();
@@ -89,8 +86,14 @@ export class TranslationExtension implements Extension {
   public translateText(textId: string, locale: string, params: object): string {
     locale = this.selectLocale(locale, textId);
 
-    let translated: string =
-      this.options.translations[locale]?.['message']?.[textId] || textId;
+    let translated: string = this.getPathValue(
+      this.options.translations[locale],
+      textId,
+    );
+
+    if (translated === undefined) {
+      translated = textId;
+    }
 
     // Parameter substitution
     for (const paramName in params) {
@@ -140,7 +143,7 @@ export class TranslationExtension implements Extension {
    */
   private translationExistsForLocale(locale: string, textId: string): boolean {
     return (
-      this.options.translations[locale]?.['message']?.[textId] !== undefined
+      this.getPathValue(this.options.translations[locale], textId) !== undefined
     );
   }
 
@@ -168,6 +171,30 @@ export class TranslationExtension implements Extension {
 
     // use fallback locale
     return this.options.fallbackLocale;
+  }
+
+  /**
+   * Get path value from object.
+   *
+   * @param {object} obj - object
+   * @param {string} path - path index
+   * @return {string}
+   * @private
+   */
+  private getPathValue(obj: any, path: string): string {
+    if (!obj) {
+      return undefined;
+    }
+
+    for (
+      let i = 0, pathArray = path.split('.'), len = pathArray.length;
+      i < len;
+      i++
+    ) {
+      obj = obj[pathArray[i]];
+    }
+
+    return obj;
   }
 }
 

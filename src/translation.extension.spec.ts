@@ -82,28 +82,28 @@ describe('TranslationExtension', () => {
   });
 
   it('translates correctly for de locale', () => {
-    expect(extension.trans({}, 'de', () => 'hello')).toEqual({
+    expect(extension.trans({}, 'de', () => 'message.hello')).toEqual({
       length: 5,
       val: 'Hallo',
     });
   });
 
   it('translates correctly for en locale', () => {
-    expect(extension.trans({}, 'en', () => 'hello')).toEqual({
+    expect(extension.trans({}, 'en', () => 'message.hello')).toEqual({
       length: 5,
       val: 'Hello',
     });
   });
 
   it('translates correctly with fallback to default en locale', () => {
-    expect(extension.trans({}, undefined, () => 'hello')).toEqual({
+    expect(extension.trans({}, undefined, () => 'message.hello')).toEqual({
       length: 5,
       val: 'Hello',
     });
   });
 
   it('translates correctly with fallback to default en locale', () => {
-    expect(extension.trans({}, 'fr', () => 'hello')).toEqual({
+    expect(extension.trans({}, 'fr', () => 'message.hello')).toEqual({
       length: 5,
       val: 'Hello',
     });
@@ -111,7 +111,12 @@ describe('TranslationExtension', () => {
 
   it('translates correctly with parameters for de locale', () => {
     expect(
-      extension.trans({}, 'de', { name: 'Welt' }, () => 'hello_with_params'),
+      extension.trans(
+        {},
+        'de',
+        { name: 'Welt' },
+        () => 'message.hello_with_params',
+      ),
     ).toEqual({
       length: 10,
       val: 'Hallo Welt',
@@ -120,7 +125,12 @@ describe('TranslationExtension', () => {
 
   it('translates correctly with parameters for en locale', () => {
     expect(
-      extension.trans({}, 'en', { name: 'World' }, () => 'hello_with_params'),
+      extension.trans(
+        {},
+        'en',
+        { name: 'World' },
+        () => 'message.hello_with_params',
+      ),
     ).toEqual({
       length: 11,
       val: 'Hello World',
