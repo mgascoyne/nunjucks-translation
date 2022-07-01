@@ -24,23 +24,19 @@ const translationExtension = new TranslationExtension({
   translations: {
     de: {
       message: {
-        hello: 'Hallo {name}',
+        hello1: 'Hallo',
+        hello2: 'Hallo {name}',
       },
     },
     en: {
       message: {
-        hello: 'Hello {name}',
+        hello1: 'Hello',
+        hello2: 'Hello {name}',
       }
     },
-    de_DE: {
-      MSG_HELLO: 'Hallo ${name}',
-    },
-    en_EN: {
-      MSG_HELLO: 'Hello ${name}',
-    },
   },
-  locale: 'de_DE',
-  fallbackLocale: 'en_EN',
+  locale: 'de',
+  fallbackLocale: 'en',
 });
 
 nunjucksEnv.addExtension('translation-extension', translationExtension);
@@ -75,8 +71,13 @@ You can use the `trans` and `endtrans` tags to translate your content.
   <head>
   </head>
   <body>
-    {% trans('de', { name: 'John Doe' }) %}hello{% endtrans %}
-    {% trans('de_DE', { name: 'John Doe' }) %}MSG_HELLO{% endtrans %}
+    {% trans('de') %}message.hello1{% endtrans %} // result will be "Hallo"
+    {% trans('en') %}message.hello1{% endtrans %} // result will be "Hello"
+    {% trans('de', { name: 'John Doe' }) %}message.hello2{% endtrans %} // result will be "Hallo John Doe"
+    {% trans('de', { name: 'John Doe' }) %}message.hello2{% endtrans %} // result will be "Hello John Doe"
+
+    {% trans(null) %}message.hello1{% endtrans %} // result will be "Hallo" due to default locale
+    {% trans('es') %}message.hello1{% endtrans %} // result will be "Hello" due to fallback locale
   </body>
 </html>
 ```
@@ -90,8 +91,13 @@ You can also use the `trans` filter to translate your content.
   <head>
   </head>
   <body>
-    {{ 'hello'|trans('de', { name: 'John Doe' }) }}
-    {{ 'MSG_HELLO'|trans('de_DE', { name: 'John Doe' }) }}
+    {{ 'message.hello1'|trans('de') }} // result will be "Hallo"
+    {{ 'message.hello1'|trans('en') }} // result will be "Hello"
+    {{ 'message.hello2'|trans('de', { name: 'John Doe' }) }} // result will be "Hallo John Doe"
+    {{ 'message.hello2'|trans('en', { name: 'John Doe' }) }} // result will be "Hello John Doe"
+
+    {{ 'message.hello1'|trans(null) }} // result will be "Hallo" due to default locale
+    {{ 'message.hello1'|trans('es) }} // result will be "Hello" due to fallback locale
   </body>
 </html>
 ```
